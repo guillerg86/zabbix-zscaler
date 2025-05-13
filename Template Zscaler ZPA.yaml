@@ -1,0 +1,689 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 1e2c2c2f2e224c51a2ee64d422aeb4b4
+      name: Templates/SaaS
+  templates:
+    - uuid: 3e2ca123e2644e41b204fc30a0370037
+      template: 'Template ZScaler ZPA'
+      name: 'Template ZScaler ZPA'
+      description: |
+        Template for Zscaler ZPA
+        
+        @author: Guille Rodriguez Gonzalez 
+        @github: https://github.com/guillerg86/
+        @linkedin: www.linkedin.com/in/guille-rodriguez-gonzalez
+      groups:
+        - name: Templates/SaaS
+      items:
+        - uuid: b2200a64971f415f99f0c0e6bd695f5b
+          name: 'Connectors raw data'
+          type: EXTERNAL
+          key: 'zabbix_zscaler_connectors.py[-cuid,{$ZSCALER.ZPA.CUSTOMER_ID},-clid,{$ZSCALER.ZPA.CLIENT_ID},-ckey,{$ZSCALER.ZPA.CLIENT_SECRET},-a,get-connectors]'
+          delay: 2m
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          timeout: 10s
+      discovery_rules:
+        - uuid: f4c74cdb47f84240b2dc9e1b24ec5f8e
+          name: 'ZPA Connectors Discovery'
+          type: EXTERNAL
+          key: 'zabbix_zscaler_connectors.py[-a,get-connectors,-cuid,{$ZSCALER.ZPA.CUSTOMER_ID},-clid,{$ZSCALER.ZPA.CLIENT_ID},-ckey,{$ZSCALER.ZPA.CLIENT_SECRET}]'
+          delay: 2h
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1d
+          item_prototypes:
+            - uuid: 2089fb742d85459d9ac9f599f8052760
+              name: '{#ZSCALER.CONNECTOR.NAME}: Connector Group ID'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.app_connector_group_id[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.app_connector_group_id
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 9b2b01134388482395da81642e95d375
+              name: '{#ZSCALER.CONNECTOR.NAME}: Connector Group Name'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.app_connector_group_name[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.app_connector_group_name
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: f37986c45c3a4b03b24133f4ad53436b
+              name: '{#ZSCALER.CONNECTOR.NAME}: Control Channel Status'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.control_channel_status[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.control_channel_status
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: faf6c2953314447f891bd36898bf23d9
+              name: '{#ZSCALER.CONNECTOR.NAME}: Control Broker Name'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.ctrl_broker_name[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.ctrl_broker_name
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 43bc5d25023b497b9ee1fa6165d59603
+              name: '{#ZSCALER.CONNECTOR.NAME}: Current Version'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.current_version[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.current_version
+                - type: REGEX
+                  parameters:
+                    - '^(\d+(.\d+.\d+)*).*'
+                    - \1
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var data = value.split(".")
+                      var version = data.shift()+"."+data.join('')
+                      return version
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 87022b1f928646858e0c33c014700219
+              name: '{#ZSCALER.CONNECTOR.NAME}: Current version (string)'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.current_version_string[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.current_version
+                - type: REGEX
+                  parameters:
+                    - '^(\d+(.\d+.\d+)*).*'
+                    - \1
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 56d2affeff9b439b937cfb4f265576bf
+              name: '{#ZSCALER.CONNECTOR.NAME}: Enabled'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.enabled[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              valuemap:
+                name: True-False
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.enabled
+                - type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+              trigger_prototypes:
+                - uuid: 1518609726804897a3d2f0e06625175c
+                  expression: 'change(/Template ZScaler ZPA/zscaler.zspa.connector.enabled[{#ZSCALER.CONNECTOR.ID}])<>0 and last(/Template ZScaler ZPA/zscaler.zspa.connector.enabled[{#ZSCALER.CONNECTOR.ID}])=0'
+                  name: '{#ZSCALER.CONNECTOR.NAME}: Enabled status changed to disabled'
+                  priority: WARNING
+            - uuid: c5e27b252be34e06ae8b508572d5d9aa
+              name: '{#ZSCALER.CONNECTOR.NAME}: Expected version'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.expected_version[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.expected_version
+                - type: REGEX
+                  parameters:
+                    - '^(\d+(.\d+.\d+)*).*'
+                    - \1
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var data = value.split(".")
+                      var version = data.shift()+"."+data.join('')
+                      return version
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 9550f0e56ffa451aa049705ce8455a43
+              name: '{#ZSCALER.CONNECTOR.NAME}: Fingerprint'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.fingerprint[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.fingerprint
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: c31f0dea977248e1b6db37aafe26e12a
+              name: '{#ZSCALER.CONNECTOR.NAME}: Raw data'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: '0'
+              value_type: TEXT
+              trends: '0'
+              description: 'Raw data for Connector with ID: {#ZSCALER.CONNECTOR.ID} and NAME: {#ZSCALER.CONNECTOR.NAME}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[?(@.id=={#ZSCALER.CONNECTOR.ID})]'
+                - type: JSONPATH
+                  parameters:
+                    - '$[0]'
+              master_item:
+                key: 'zabbix_zscaler_connectors.py[-cuid,{$ZSCALER.ZPA.CUSTOMER_ID},-clid,{$ZSCALER.ZPA.CLIENT_ID},-ckey,{$ZSCALER.ZPA.CLIENT_SECRET},-a,get-connectors]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'ZScaler connectors raw'
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 34fb2d800b9c46f1b59b06e843f52f2c
+              name: '{#ZSCALER.CONNECTOR.NAME}: Connected since (last_broker_connect_time)'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.last_broker_connect_time[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              units: unixtime
+              description: 'This item tells the timestamp when connector was connected to cloud. If value is high it tells that connector is still connected!!!'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.last_broker_connect_time
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 6d0ba598569e4a6ab64ca80adec3986f
+              name: '{#ZSCALER.CONNECTOR.NAME}: Last disconnection'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.last_broker_disconnect_time[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              units: unixtime
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.last_broker_disconnect_time
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 50907ab61e67492680ab1df150b167de
+              name: '{#ZSCALER.CONNECTOR.NAME}: Last upgrade date (timestamp)'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.last_upgrade_time[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              units: unixtime
+              description: 'This item tells the timestamp when connector was connected to cloud. If value is high it tells that connector is still connected!!!'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.last_upgrade_time
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 1b1b41e7f4e14fb693e93c1c137fa347
+              name: '{#ZSCALER.CONNECTOR.NAME}: Latitude'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.latitude[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.latitude
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: a91d4ab596594ff1b5120fc92ea9e4c5
+              name: '{#ZSCALER.CONNECTOR.NAME}: Location'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.location[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.location
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 2b3d6fd777854d08806acf151476bcc7
+              name: '{#ZSCALER.CONNECTOR.NAME}: Longitude'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.longitude[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.longitude
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 8a5beb400cb247e181ed7e4005e9d373
+              name: '{#ZSCALER.CONNECTOR.NAME}: Modified by user ID'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.modified_by[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              units: unixtime
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.modified_by
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 24fb09fd8579494eb7c655920cf4460b
+              name: '{#ZSCALER.CONNECTOR.NAME}: Modified time'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.modified_time[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              units: unixtime
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.modified_time
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: f7f16c11f69649cea14d3d93e22ca045
+              name: '{#ZSCALER.CONNECTOR.NAME}: Platform'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.platform[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.platform
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: e39276c5f36f4fdda9cafe099cccb4d5
+              name: '{#ZSCALER.CONNECTOR.NAME}: Platform details'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.platform_detail[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.platform_detail
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 936c358a4a6848ec9c5efd5299b14dd9
+              name: '{#ZSCALER.CONNECTOR.NAME}: Previous version'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.previous_version[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.previous_version
+                - type: REGEX
+                  parameters:
+                    - '^(\d+(.\d+.\d+)*).*'
+                    - \1
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var data = value.split(".")
+                      var version = data.shift()+"."+data.join('')
+                      return version
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: ad400e5ffa8647119c5a7ac1bd7b2a58
+              name: '{#ZSCALER.CONNECTOR.NAME}: Private IP address'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.private_ip[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.private_ip
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 4767ebb4c8d44920a4b958f90a2cd71b
+              name: '{#ZSCALER.CONNECTOR.NAME}: Public IP address'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.public_ip[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.public_ip
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: 8c701f31e02a4ed78945c8f5871b4202
+              name: '{#ZSCALER.CONNECTOR.NAME}: Upgrade attempts'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.upgrade_attempt[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.upgrade_attempt
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+            - uuid: fd8fc2cb7bf24c48921c92f309df8b25
+              name: '{#ZSCALER.CONNECTOR.NAME}: Upgrade status'
+              type: DEPENDENT
+              key: 'zscaler.zspa.connector.upgrade_status[{#ZSCALER.CONNECTOR.ID}]'
+              delay: '0'
+              history: 7d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.upgrade_status
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'zscaler.zspa.connector.get_raw[{#ZSCALER.CONNECTOR.ID}]'
+              tags:
+                - tag: Application
+                  value: Zscaler
+                - tag: Application
+                  value: 'Zscaler ZPA connector'
+                - tag: Application
+                  value: 'Zscaler ZPA {#ZSCALER.CONNECTOR.NAME}'
+              trigger_prototypes:
+                - uuid: 11d2598d468a401f9d7b5fe54e39123e
+                  expression: 'last(/Template ZScaler ZPA/zscaler.zspa.connector.upgrade_status[{#ZSCALER.CONNECTOR.ID}])<>"COMPLETE"'
+                  name: '{#ZSCALER.CONNECTOR.NAME}: Upgrade status'
+                  opdata: '{ITEM.LASTVALUE}'
+                  priority: INFO
+          trigger_prototypes:
+            - uuid: 608c9be0ce894ef7b8268952063affd7
+              expression: 'last(/Template ZScaler ZPA/zscaler.zspa.connector.last_broker_disconnect_time[{#ZSCALER.CONNECTOR.ID}])>last(/Template ZScaler ZPA/zscaler.zspa.connector.last_broker_connect_time[{#ZSCALER.CONNECTOR.ID}]) and last(/Template ZScaler ZPA/zscaler.zspa.connector.enabled[{#ZSCALER.CONNECTOR.ID}])=1'
+              name: '{#ZSCALER.CONNECTOR.NAME}: Disconnected'
+              priority: WARNING
+              description: 'Connector last disconnected timestamp is higher than last connected timestamp'
+            - uuid: 0b711f83d07d49b6a00ac02110bdffb8
+              expression: 'last(/Template ZScaler ZPA/zscaler.zspa.connector.current_version[{#ZSCALER.CONNECTOR.ID}])<last(/Template ZScaler ZPA/zscaler.zspa.connector.expected_version[{#ZSCALER.CONNECTOR.ID}])'
+              name: '{#ZSCALER.CONNECTOR.NAME}: Upgrade available'
+              opdata: 'actual v{ITEM.LASTVALUE1}, new v{ITEM.LASTVALUE2}'
+              priority: INFO
+          timeout: 30s
+          lld_macro_paths:
+            - lld_macro: '{#ZSCALER.CONNECTOR.ID}'
+              path: $.id
+            - lld_macro: '{#ZSCALER.CONNECTOR.NAME}'
+              path: $.name
+      macros:
+        - macro: '{$ZSCALER.CONNECTOR.ZPA.MIN_VERSION}'
+          value: '26'
+        - macro: '{$ZSCALER.ZPA.CLIENT_ID}'
+          description: 'API Client ID'
+        - macro: '{$ZSCALER.ZPA.CLIENT_SECRET}'
+          description: 'API Client Secret'
+        - macro: '{$ZSCALER.ZPA.CUSTOMER_ID}'
+          description: 'Customer ID of Zscaler'
+      valuemaps:
+        - uuid: 55ff7e3e6d004ed487df9803d705fb84
+          name: True-False
+          mappings:
+            - value: '1'
+              newvalue: 'True'
+            - value: '0'
+              newvalue: 'False'
