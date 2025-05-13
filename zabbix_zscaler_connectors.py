@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 #######################################################################################
 # @author: Guille Rodriguez https://github.com/guillerg86
