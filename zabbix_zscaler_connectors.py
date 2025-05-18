@@ -4,8 +4,19 @@
 # @version: 2025-05-13 (YYYY-MM-DD)
 # @python-version: 3.x
 #
-# This script allows for controlled retrieval of ZScaler ZPA Connectors information
+# This script allows for controlled retrieval of ZScaler ZPA Connectors information,  
+# helping to avoid HTTP 429 (Too Many Requests) errors that can occur when monitoring
+# a large number of connectors via the API. It provides two main actions:
 #
+# - get-connectors: Retrieves the full list of connector from the Zscaler ZPA API and
+#                   either saves it to a JSON file or prints it to the console (testing).
+#
+# - get-connector:  Extracts information for a specific Zscaler ZPA connector (by ID) 
+#                   from the previously saved file, avoiding repeated API calls.
+#
+# The main goal of the script is to facilitate local monitoring of Zscaler ZPA Connectors
+# through centralized and efficient queries, making it ideal for environments with high
+# volumes where reducing API load is critical.
 #######################################################################################
 
 import argparse

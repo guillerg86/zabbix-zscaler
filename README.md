@@ -25,7 +25,7 @@ For testing purposes, you can execute
 ./zabbix_zscaler_connectors.py -cuid <CUSTOMER_ID> -clid '<CLIENT_ID_API>' -ckey '<CLIENT_SECRET_API>' -a get-connectors
 ```
 
-*If works fine, you will see a JSON array with ZPA Connectors info. If you need to set the name of the ZScaler tenant (for identify customer), you can add `--client-name <CUSTOMER_NAME>`. A new field in JSON will appear with the name given.*
+If works fine, you will see a JSON array with ZPA Connectors info. *If you need to set the name of the ZScaler tenant (for identify customer), you can add `--client-name <CUSTOMER_NAME>`. A new field in JSON will appear with the name given.*
 
 After that you can try to save the file to disk. Default folder is `/tmp`
 
