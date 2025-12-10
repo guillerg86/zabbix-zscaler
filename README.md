@@ -59,13 +59,20 @@ chmod +x /usr/lib/zabbix/externalscripts/zabbix_zscaler_connectors.py
 |Information|{#ZSCALER.CONNECTOR.NAME}: Upgrade available|
 |Information|{#ZSCALER.CONNECTOR.NAME}: Upgrade status|
 
+### Macros (4)
+
+- {$ZSCALER.ZPA.CUSTOMER_ID}
+- {$ZSCALER.ZPA.CLIENT_ID}
+- {$ZSCALER.ZPA.CLIENT_SECRET}
+- {$ZSCALER.CONNECTOR.ZPA.MIN_VERSION} - Not used at this moment
+
 ## ZScaler Private Access Configuration
 
-Access to your tenant **Administration > Private Access Tenant** to get your **Tenant ZPA ID** (there is a field with this name).
+Access to your tenant **Administration > Private Access Tenant** to get your **Tenant ZPA ID** (there is a field with this name), you will use this as the value of *{$ZSCALER.ZPA.CUSTOMER_ID}* macro.
 
-After that, go to **Administration > API Configuration > Legacy API > Private Access API** and create new API, grab the client ID and Client Secret. 
+After that, go to **Administration > API Configuration > Legacy API > Private Access API** and create new API, grab the client ID and Client Secret, this will be used as the value of *{$ZSCALER.ZPA.CLIENT_ID}* and *{$ZSCALER.ZPA.CLIENT_SECRET}* macros. 
 
-Now test with CLI
+Now test with CLI and save it for later (you will need to configure zabbix-host)
 
 
 ## CLI Test
@@ -109,7 +116,7 @@ chmod +x /usr/lib/zabbix/externalscripts/zabbix_zscaler_connectors.py
 ## Configuring Host on Zabbix
 
 Create a new host.
-
+ 
 <table>
 <tr><th>Hostname</th><td>Set the hostname you want</td></tr>
 <tr><th>Templates</th><td>Template Zscaler ZPA <- This template... </td></tr>
@@ -117,7 +124,15 @@ Create a new host.
 <tr><th>Monitored by</th><td>Server or Proxy (& select the proxy)</td></tr>
 </table>
 
-After save the new host, go to the **Host -> Discovery Rules** and execute **ZPA Connectors Discovery rule**. After few seconds all ZPA Connectors will appear inside host.
+On Macros tab, set macro names and values
+
+|Macro name|Macro value|Description|
+|-|-|-|
+|{$ZSCALER.ZPA.CUSTOMER_ID}|TENANT_ZPA_ID|***Administration > Private Access Tenant > Tenant ZPA ID***|
+|{$ZSCALER.ZPA.CLIENT_ID}|CLIENT_ID_API|API credentials from ***Administration > API Configuration > Legacy API > Private Access API***|
+|{$ZSCALER.ZPA.CLIENT_ID}|CLIENT_SECRET_API|API credentials from ***Administration > API Configuration > Legacy API > Private Access API***|
+
+Save the new host, go to the **Host -> Discovery Rules** and execute **ZPA Connectors Discovery rule**. After few seconds all ZPA Connectors will appear inside host.
 
 Remember, if you are setting monitoring by proxy, you need to wait more time (proxy sync...) or you can restart service on proxy to force a sync with server.
 
